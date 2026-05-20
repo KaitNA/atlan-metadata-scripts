@@ -3,7 +3,7 @@
 import os
 from dotenv import load_dotenv
 from pyatlan.client.atlan import AtlanClient
-from pyatlan.model.assets import Connection, Database, Schema, Table
+from pyatlan.model.assets import Connection
 from pyatlan.model.enums import AtlanConnectionCategory, AtlanConnectorType
 
 # Load credentials
@@ -18,11 +18,11 @@ client = AtlanClient(
 
 admin_role_guid = client.role_cache.get_id_for_name("$admin")
     
-# Create a connection with POSTGRES connector type (best for database tables)
+# Create a connection, change the connector type 
 connection = Connection.creator(
         client=client,
         name="MSSQL_API_Test",
-        connector_type=AtlanConnectorType.MSSQL,  # Use standard connector
+        connector_type=AtlanConnectorType.MSSQL,  # change the connector type
         admin_roles=[admin_role_guid],
     )
         
