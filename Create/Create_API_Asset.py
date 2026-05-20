@@ -3,62 +3,40 @@ import logging
 from dotenv import load_dotenv
 from pyatlan.client.atlan import AtlanClient
 from pyatlan.model.enums import AtlanConnectorType , APIQueryParamTypeEnum
-from pyatlan.model.assets import Connection, APISpec, APIPath, APIObject, APIQuery, APIField 
+from pyatlan.model.assets import Connection, APISpec, APIPath, APIObject, APIQuery, APIField #import typedefs you want to create
 
-# Load environment variables from .env file
+# Load credentials
 load_dotenv()
-BASE_URL = str(os.getenv('ATLAN_BASE_URL'))
-API_KEY = str(os.getenv('ATLAN_API_KEY'))
+ATLAN_BASE_URL =os.getenv('ATLAN_BASE_URL')
+ATLAN_API_KEY =os.getenv('ATLAN_API_KEY')
 
-### Intialize Client
 client = AtlanClient(
-    base_url= BASE_URL,
-    api_key = API_KEY
+    base_url= ATLAN_BASE_URL,
+    api_key = ATLAN_API_KEY
 )
-# STEP 1: 
-# #Get the admin role GUID (required for connection creation)
-admin_role_guid = client.role_cache.get_id_for_name("$admin")
 
-# Create a connection with the desired connector type. Uncomment this section to create a connection
-#connection = Connection.creator(
-#    name="Banking APP",  # Provide a human-readable name for your connection
-#    connector_type=AtlanConnectorType.APP,  # Set the connector type you want
-#    admin_roles=[admin_role_guid],  # Specify who can administer this connection
-    # Optional: You can also specify admin groups or users
-    # admin_groups=["group-name"],
-    # admin_users=["username"],
+#STEP 1: Specify Connection GUID
+connection_qualified_name= 'example default/api/12344567' #connection_qualified_name
 
-# Save the connection to Atlan
-#response = client.asset.save(connection)
-
-# Get the qualified name of the created connection
-#connection_qualified_name = response.assets_created(asset_type=Connection)[0].qualified_name
-#print(f"Connection created successfully with qualified name: {connection_qualified_name}")
-
-#STEP 2: Create API spec and object first
-connection_qualified_name= 'default/api/1779216981' #connection_qualified_name -use this if you created a connection
-spec_qualified_name = 'default/api/1779216981/Example_API'
-
-# Create API object
+# Create Asset using the creator, change typedef based on asset type trying to create. 
 apiObject = APIObject.creator(
-    name="release",
+    name="[example location]",
     connection_qualified_name = connection_qualified_name,
     api_field_count = 3
 )
-response = client.asset.save(apiObject) # 
+response = client.asset.save(apiObject)  
 object_qualified_name = response.assets_created(asset_type=APIObject)[0].qualified_name 
 
-# Step 4: Define field metadata
+# Step 4: Define child assets if typedef supports 
 fields = [
-     {"name": "INDUSTRY_LOAN"},
-    {"name": "RATE"},
-    {"name": "TYPE"}
+     {"name": "Example Location Name"},
+    {"name": "Example State"},
+    {"name": "Example Zip"}
 
 ]
-
 responses = []
 
-# Step 5: Create API fields
+# Step 5: Create child assets
 for field in fields:
     apifield = APIField.creator(
         name=field["name"],
